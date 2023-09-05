@@ -1,0 +1,79 @@
+FROM debian:bullseye
+SHELL ["/bin/bash", "-c"]
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+ENV \
+  LANG='C.UTF-8' \
+  LC_ALL='C.UTF-8' \
+  TZ=Asia/Shanghai \
+  WINEDEBUG=-all
+
+RUN apt-get update \
+  && apt-get install -y \
+    ttf-wqy-microhei \
+    ttf-wqy-zenhei \
+    xfonts-wqy \
+    \
+    apt-transport-https \
+    ca-certificates \
+    cabextract \
+    curl \
+    gnupg2 \
+    gosu \
+    software-properties-common \
+    tzdata \
+    unzip \
+  && apt-get autoremove -y \
+  && apt-get clean \
+  && rm -fr /tmp/*
+
+# https://wiki.winehq.org/Debian
+RUN dpkg --add-architecture i386 \
+  && curl -sL https://dl.winehq.org/wine-builds/winehq.key | apt-key add - \
+  && apt-add-repository 'deb https://dl.winehq.org/wine-builds/debian/ bullseye main' \
+  && echo 'i386 Architecture & Wine Repo Added' \
+  \
+  && curl -sL https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/Debian_11/Release.key | apt-key add - \
+  && echo 'deb http://download.opensuse.org/repositories/Emulators:/Wine:/Debian/Debian_11 ./' | tee /etc/apt/sources.list.d/wine-obs.list \
+  && echo 'libfaudio0 Repo Added' \
+  \
+  && apt-get update \
+  && apt-get install -y \
+    winehq-stable \
+  && apt-get autoremove -y \
+  && apt-get clean \
+  && rm -fr /tmp/*
+
+ARG GECKO_VER=2.47.4
+ARG MONO_VER=8.0.0
+RUN mkdir -p /usr/share/wine/{gecko,mono} \
+  && curl -sL -o /usr/share/wine/gecko/wine-gecko-${GECKO_VER}-x86.msi \
+    "https://dl.winehq.org/wine/wine-gecko/${GECKO_VER}/wine-gecko-${GECKO_VER}-x86.msi" \
+  && curl -sL -o /usr/share/wine/mono/wine-mono-${MONO_VER}-x86.msi \
+    "https://dl.winehq.org/wine/wine-mono/${MONO_VER}/wine-mono-${MONO_VER}-x86.msi" \
+  && echo 'Gecko & Mono Downloaded' \
+  \
+  && curl -sL -o /usr/local/bin/winetricks \
+    https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
+  && chmod +x /usr/local/bin/winetricks \
+  && echo 'Winetricks Installed' \
+  \
+  && su root -c 'WINEARCH=win32 wine wineboot' \
+  \
+  # wintricks
+  && winetricks -q msls31 \
+  && winetricks -q ole32 \
+  && winetricks -q riched20 \
+  && winetricks -q riched30 \
+  && winetricks -q win7 \
+  \
+  # Clean
+  && rm -fr /usr/share/wine/{gecko,mono} \
+  && rm -fr /tmp/* \
+  && echo 'Wine Initialized'
+
+COPY data/simsun.ttc /root/.wine/drive_c/windows/Fonts/
+COPY [A-Z]* /
+COPY VERSION /VERSION.docker-wine
+COPY src/winescript /usr/local/bin/

@@ -37,8 +37,8 @@ function startWechat () {
   hello
   setupFontDpi
 
-  /dochat/patch-hosts.sh
-  /dochat/disable-upgrade.sh
+  /root/bin/dochat/patch-hosts.sh
+  /root/bin/dochat/disable-upgrade.sh
 
   if [ -n "$DOCHAT_DEBUG" ]; then
     unset WINEDEBUG
@@ -53,9 +53,9 @@ function startWechat () {
     echo '[DoChat] Starting...'
 
     if [ -n "$DOCHAT_DEBUG" ]; then
-      wine 'C:\Program Files\Tencent\WeChat\WeChat.exe'
+      wine 'C:\Program Files (x86)\Tencent\WeChat\WeChat.exe'
     else
-      if ! wine 'C:\Program Files\Tencent\WeChat\WeChat.exe'; then
+      if ! wine 'C:\Program Files (x86)\Tencent\WeChat\WeChat.exe'; then
         echo "[DoChat] WeChat.exe exit with code $?"
         echo "[DoChat] Found new version?"
       fi
@@ -115,12 +115,9 @@ function main () {
   if [ "$(id -u)" -ne '0' ]; then
     startWechat
   else
-    /dochat/set-user-group.sh
-    /dochat/set-hostname.sh
-    #
-    # Switch to user:group, and re-run self to run user task
-    #
-    exec gosu user "$0" "$@"
+    # /root/bin/dochat/set-user-group.sh
+    # /root/bin/dochat/set-hostname.sh
+    exec gosu root "$0" "$@"
   fi
 }
 

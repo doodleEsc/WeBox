@@ -9,13 +9,13 @@ Windows Registry Editor Version 5.00
 
 [HKEY_CURRENT_USER\Software\Tencent\WeChat]
 "ChannelId"=dword:000003e8
-"Version"=dword:62070155
-"InstallPath"="C:\\Program Files\\Tencent\\WeChat"
-"LANG_ID"=dword:00000009
-"CrashVersion"=dword:62070155
+"Version"=dword:63060012
+"InstallPath"="C:\\Program Files (x86)\\Tencent\\WeChat"
+"LANG_ID"=dword:00000004
+"CrashVersion"=dword:63060012
 "CrashCnt"=dword:00000000
+"FileSavePath"="MyDocument:"
 "NeedUpdateType"=dword:00000000
-"UpdateFailCnt"="1644626309;3"
 _EOF_
 
 #
