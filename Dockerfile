@@ -1,14 +1,18 @@
-FROM webox-wine:0.1
+FROM wine:0.1
 
 ENV VNCPASS=YourSafeVNCPassword
 ENV LANG=zh_CN.UTF-8
 ENV LC_ALL=zh_CN.UTF-8
 ENV DISPLAY=:5
+ENV CALLBACK=callBackUrl=http://127.0.0.1:9528/wxbot/callback\&port=9527\&decryptImg=1
+
+WORKDIR /root/app
 
 RUN apt-get update \
     && DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
         locales \
         wget \
+        net-tools \
         mesa-utils \
         procps \
         pev \
@@ -32,22 +36,24 @@ RUN echo "root:${root_password}" | chpasswd \
 RUN wget --no-check-certificate -O /bin/dumb-init "https://github.com/Yelp/dumb-init/releases/download/v1.2.5/dumb-init_1.2.5_x86_64" \
     && chmod a+x /bin/dumb-init
 
-COPY [A-Z]* /root/
-COPY VERSION /root/VERSION.docker-wechat
+#COPY [A-Z]* /root/
+COPY VERSION /root/VERSION
 COPY container_root/ /root/bin/
 COPY data/wechat_3.6.0.18.tar.gz /root/
-COPY data/DaenWxHook.dll /root/bin/
-COPY data/inject.exe     /root/bin/
+COPY data/Hook /root/Hook
+COPY run.py /root/
+# COPY app /root/app
 
 # setup wechat
 RUN mkdir -p "/root/WeChat Files" "/root/.wine/drive_c/users/user/Application Data" \
-    && bash -x /root/bin/setup.sh
+    && bash -x /root/bin/setup.sh \
+    && rm -f /root/Hook.tar.gz \
+    && rm -f /root/wechat_3.6.0.18.tar.gz
 
 VOLUME [\
   "/root/WeChat Files", \
   "/root/.wine/drive_c/users/user/Application Data" \
 ]
 
-COPY run.py /root/
 ENTRYPOINT [ "/bin/dumb-init" ]
 CMD ["/usr/bin/python3", "/root/run.py"]

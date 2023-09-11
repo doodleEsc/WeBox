@@ -24,7 +24,9 @@ if ! wine REG ADD 'HKEY_CURRENT_USER\Software\Tencent\WeChat' /v NeedUpdateType 
   >&2 echo 'FAIL: "reg add HKEY_CURRENT_USER\Software\Tencent\WeChat /v NeedUpdateType /d 0"'
 fi
 
-CONFIG_EX_INI_FILE='/root/.wine/drive_c/users/root/Application Data/Tencent/WeChat/All Users/config/configEx.ini'
+# CONFIG_EX_INI_FILE='/root/.wine/drive_c/users/root/Application Data/Tencent/WeChat/All Users/config/configEx.ini'
+CONFIG_EX_INI_FILE='/root/.wine/drive_c/users/root/AppData/Roaming/Tencent/WeChat/All Users/config/configEx.ini'
 if [ -e "$CONFIG_EX_INI_FILE" ]; then
-  sed -i s/^NeedUpdateType=.*$/NeedUpdateType=0/i "$CONFIG_EX_INI_FILE"
+  echo 'NeedUpdateType=0' >> "$CONFIG_EX_INI_FILE"
+  # sed -i s/^NeedUpdateType=.*$/NeedUpdateType=0/i "$CONFIG_EX_INI_FILE"
 fi

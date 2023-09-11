@@ -76,4 +76,4 @@ RUN mkdir -p /usr/share/wine/{gecko,mono} \
 COPY data/simsun.ttc /root/.wine/drive_c/windows/Fonts/
 COPY [A-Z]* /
 COPY VERSION /VERSION.docker-wine
-COPY src/winescript /usr/local/bin/
+COPY data/winescript /usr/local/bin/

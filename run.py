@@ -4,6 +4,7 @@ import subprocess
 import os
 import signal
 import datetime
+import time
 
 
 class DockerWechatHook:
@@ -14,27 +15,6 @@ class DockerWechatHook:
 
     def now_exit(self, signum, frame):
         self.exit_container()
-
-    # def run_php(self):
-    #     if os.path.exists("/ServerPhp/Storage/pid/wechat.pid"):
-    #         os.remove("/ServerPhp/Storage/pid/wechat.pid")
-    #
-    #     if (os.environ["PHPDEBUG"] == "false") or (os.environ["PHPDEBUG"] == "False"):
-    #         subprocess.run(
-    #             [
-    #                 "sed",
-    #                 "-i",
-    #                 "s@debug' => true@debug' => false@g",
-    #                 "/ServerPhp/Config/Config.php",
-    #             ]
-    #         )
-    #
-    #     self.php = subprocess.run(
-    #         ["/usr/bin/php7.2", "index.php", "start"], cwd="/ServerPhp"
-    #     )
-
-    # def run_scanversion(self):
-    #     self.scanversion = subprocess.Popen(["/usr/bin/python3", "/scanversion.py"])
 
     def run_vnc(self):
         # 根据VNCPASS环境变量生成vncpasswd文件
@@ -59,6 +39,12 @@ class DockerWechatHook:
             ]
         )
 
+    def set_reg(self):
+        subprocess.Popen(["bash", "/root/bin/dochat/regedit.sh"])
+
+    def set_disable_upgrade(self):
+        subprocess.Popen(["bash", "/root/bin/dochat/disable-upgrade.sh"])
+
     def set_hosts(self):
         try:
             with open("/etc/hosts", "a") as file:
@@ -66,91 +52,57 @@ class DockerWechatHook:
         except Exception as e:
             print(f"Error occurred: {e}")
 
-    def run_wechat(self):
-        self.wechat = subprocess.Popen(
-            ["nohup", "wine", "C:\Program Files (x86)\Tencent\WeChat\WeChat.exe", "&"]
+    def run_hook(self):
+        callback = os.environ.get(
+            "CALLBACK", "callBackUrl=http://127.0.0.1:9528/wxbot/callback&port=9527&decryptImg=1")
+
+        self.hook = subprocess.Popen(
+            [
+                "wine",
+                "/root/.wine/drive_c/Program Files (x86)/Hook/inject.exe",
+                "C:\Program Files (x86)\Tencent\WeChat\[3.6.0.18]",
+                "C:\Program Files (x86)\Hook\DaenWxHook.dll",
+                callback,
+            ]
         )
 
-    # def run_hook(self):
-    #     app_id = os.environ["APP_ID"]
-    #     app_key = os.environ["APP_KEY"]
-    #     # 修改配置文件
-    #     subprocess.run(
-    #         [
-    #             "sed",
-    #             "-i",
-    #             "-e",
-    #             f"s@api_id=.*$@app_id={app_id}@g",
-    #             "-e",
-    #             f"s@api_key=.*$@app_key={app_key}@g",
-    #             "/Debug/Config.txt",
-    #         ]
-    #     )
-    #
-    #     self.hook = subprocess.run(["wine", "/Debug/WechatRobot.exe"])
+    def run_bot(self):
+        self.bot = subprocess.run(["/root/app/wxbot"], cwd="/root/app")
 
     def exit_container(self):
-        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 正在退出容器...")
-
-        # try:
-        #     print(
-        #         datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 退出修改版本脚本..."
-        #     )
-        #
-        #     os.kill(self.scanversion.pid, signal.SIGTERM)
-        #
-        # except Exception:
-        #     pass
-
-        # try:
-        #     print(
-        #         datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 退出Hook程序..."
-        #     )
-        #     os.kill(self.hook.pid, signal.SIGTERM)
-        # except Exception:
-        #     pass
+        print(datetime.datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S") + " 正在退出容器...")
 
         try:
-            print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 退出VNC...")
+            print(
+                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 退出Hook程序..."
+            )
+            os.kill(self.hook.pid, signal.SIGTERM)
+        except Exception:
+            pass
+
+        try:
+            print(datetime.datetime.now().strftime(
+                "%Y-%m-%d %H:%M:%S") + " 退出VNC...")
 
             os.kill(self.vnc.pid, signal.SIGTERM)
 
         except Exception as e:
             raise e
 
-        try:
-            print(
-                datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 退出WeChat..."
-            )
-
-            os.kill(self.wechat.pid, signal.SIGTERM)
-
-        except Exception as e:
-            raise e
-
-        # try:
-        #     print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 退出PHP...")
-        #
-        #     os.kill(self.php.pid, signal.SIGTERM)
-        #
-        # except Exception:
-        #     pass
-
-        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 已退出容器.")
+        print(datetime.datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S") + " 已退出容器.")
 
     def run_all_in_one(self):
-        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 启动容器中...")
-
-        # self.run_php()
-
-        # self.run_scanversion()
-
+        print(datetime.datetime.now().strftime(
+            "%Y-%m-%d %H:%M:%S") + " 启动容器中...")
         self.set_hosts()
+        self.set_reg()
         self.run_vnc()
-        self.run_wechat()
-
-        # self.run_hook()
-
+        self.run_hook()
+        time.sleep(5)
+        self.set_disable_upgrade()
+        self.run_bot()
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " 启动完成.")
 
 
