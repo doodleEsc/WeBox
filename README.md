@@ -4,8 +4,8 @@
 binary: https://drive.google.com/file/d/1Vg2pCBuDwvEdxvP6xVUhTF5a4usGKm03/view
 
 ```shell
-git clone https://github.com/doodleEsc/wxbot.git
-cd wxbot
+git clone https://github.com/doodleEsc/WeBox.git
+cd WeBox
 cp path/to/WeBox.tar.gz ./
 tar zxvf WeBox.tar.gz
 sudo docker build -t wine:0.1 -f Dockerfile_wine .
