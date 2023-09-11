@@ -24,10 +24,3 @@ Modify program parameters
 sudo docker run --name webox -d -p 5905:5905 -v path/to/app:/root/app -e VNCPASS={YOUR_VNC_PASSWORD} -e CALLBACK="callBackUrl=http://127.0.0.1:9528/wxbot/callback\&port=9527\&decryptImg=1" webox:0.1
 
 ```
-
-## Common
-
-default password
-```
-Webox#1234
-```
