@@ -62,8 +62,10 @@ class DockerWechatHook:
                 "/root/.wine/drive_c/Program Files (x86)/Hook/inject.exe",
                 "C:\Program Files (x86)\Tencent\WeChat\[3.6.0.18]",
                 "C:\Program Files (x86)\Hook\DaenWxHook.dll",
-                callback,
-            ]
+                callback
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT
         )
 
     def run_bot(self):
